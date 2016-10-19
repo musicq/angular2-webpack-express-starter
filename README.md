@@ -1,4 +1,4 @@
-# angular-webpack-express-starter
+# angular2-webpack-express-starter
 Angular2 with webpack and express starter.
 
 ## 下载
