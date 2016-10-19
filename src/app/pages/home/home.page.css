@@ -1,0 +1,17 @@
+:root {
+    --dark_blue: #409ada;
+}
+
+span {
+    color: lightcoral;
+}
+
+a {
+    color: #1ea38b;
+
+    user-select: none;
+
+    &:hover {
+         color: color(var(--dark_blue) a(54%));
+    }
+}

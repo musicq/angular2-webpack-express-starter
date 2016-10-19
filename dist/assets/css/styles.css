@@ -1,0 +1,29 @@
+body {
+    background: #253c51;
+    color: #fff;
+}
+
+nav {
+    height: 30px;
+    line-height: 2;
+    text-align: center;
+}
+
+nav a {
+    display: inline-block;
+    color: #12fff2;
+    text-decoration: none;
+    padding: 3px 23px;
+    border: 1px solid;
+    width: 80px;
+}
+
+nav a.active {
+    color: #9dda1f;
+}
+
+.container {
+    text-align: center;
+    position: relative;
+    top: 4rem;
+}

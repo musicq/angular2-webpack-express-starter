@@ -1,0 +1,6 @@
+# pm2 启动配置
+apps:
+  - name: MNTCMSCloud v2.0
+    script: bin/www
+    exec_mode: cluster
+    node_args: --use_strict

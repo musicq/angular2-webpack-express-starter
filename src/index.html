@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+    <base href="<%= webpackConfig.metadata.baseUrl %>">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title><%= webpackConfig.metadata.title %></title>
+    
+    <meta name="description" content="<%= webpackConfig.metadata.title %>">
+</head>
+<body>
+
+    <app-root>
+        <!-- loading -->
+        <div class="spinner-container">
+            <div class="spinner">
+                <div class="double-bounce1"></div>
+                <div class="double-bounce2"></div>
+            </div>
+        </div>
+    </app-root>
+
+    <% if (webpackConfig.metadata.isDevServer && webpackConfig.metadata.HMR !== true) { %>
+    <!-- Webpack Dev Server reload -->
+    <script src="/webpack-dev-server.js"></script>
+    <% } %>
+</body>
+</html>
