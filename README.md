@@ -1,5 +1,5 @@
 # angular2-webpack-express-starter
-Angular2 with webpack and express starter.
+Angular2 with webpack and express starter. 参考 [@AngularClass 的 angular2-webpack-starter](https://angularclass.github.io/angular2-webpack-starter/)
 
 ## 下载
 
