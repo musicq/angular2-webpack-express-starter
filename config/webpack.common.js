@@ -1,6 +1,5 @@
 /**
  * @author musicq
- * @create 2016-9-23
  */
 
 const webpack = require('webpack');

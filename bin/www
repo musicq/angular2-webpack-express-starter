@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 const app = require('../server');
-const debug = require('debug')('MNTCMSCloud2.0:server');
+const debug = require('debug')('angular2-webpack-express-starter:server');
 const http = require('http');
 
 /**

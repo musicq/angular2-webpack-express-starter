@@ -1,6 +1,5 @@
 /**
  * @author musicq
- * @create 2016-09-28
  */
 
 const helpers = require('./helpers');

@@ -1,6 +1,5 @@
 /**
  * @author musicq
- * @create 2016-9-26
  * @description 测试路由文件，路由示例
  */
 

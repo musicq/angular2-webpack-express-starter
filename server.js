@@ -1,12 +1,9 @@
-/**
- * @author musicq
- * @create 2016-9-26
- */
-
 const express = require('express');
 const path = require('path');
 const favicon = require('serve-favicon');
+const logger = require('morgan');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const api_router = require('./routes/router');
 
 const app = express();
@@ -16,35 +13,10 @@ const app = express();
 /*                              middle ware                                */
 /***************************************************************************/
 app.use(favicon(path.join(__dirname, 'favicon.ico')));
-app.use(bodyParser.json({ limit: '500mb' }));
-app.use(bodyParser.urlencoded({ limit: '500mb', extended: true }));
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, sign');
-  res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
-  res.header('X-Powered-By', 'iBeaconCS');
-  req.method === 'OPTIONS' ? res.send(200) : next();
-});
-app.use((req, res, next) => {
-  let logData = {
-    time   : new Date(),
-    spdy   : req.spdyVersion,
-    path   : req.path,
-    headers: req.headers,
-    method : req.method,
-    params : req.params,
-    body   : req.body,
-    remote : req.connection.remoteAddress,
-    status : res.statusCode
-  };
-  let strLogData = JSON.stringify(logData);
-
-  console.log('**************************************************');
-  console.log('LOG : ' + strLogData);
-  console.log('**************************************************');
-
-  next();
-});
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 /**
  * 路由
