@@ -70,6 +70,7 @@
     "karma-phantomjs-launcher": "^1.0.2",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.8.0",
+    "nodemon": "^1.11.0",
     "null-loader": "^0.1.1",
     "postcss-load-config": "^1.0.0",
     "postcss-loader": "^1.2.0",
