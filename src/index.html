@@ -1,19 +1,19 @@
 <!doctype html>
 <html>
 <head>
-    <base href="<%= webpackConfig.metadata.baseUrl %>">
-    
+    <base href="<%= htmlWebpackPlugin.options.metadata.baseUrl %>">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <title><%= webpackConfig.metadata.title %></title>
-    
-    <meta name="description" content="<%= webpackConfig.metadata.title %>">
+    <meta name="description" content="<%= htmlWebpackPlugin.options.title %>">
+
+    <title><%= htmlWebpackPlugin.options.title %></title>
 </head>
 <body>
 
-    <app-root>
+    <mnt-app>
         <!-- loading -->
         <div class="spinner-container">
             <div class="spinner">
@@ -21,9 +21,9 @@
                 <div class="double-bounce2"></div>
             </div>
         </div>
-    </app-root>
+    </mnt-app>
 
-    <% if (webpackConfig.metadata.isDevServer && webpackConfig.metadata.HMR !== true) { %>
+    <% if (htmlWebpackPlugin.options.metadata.isDevServer && htmlWebpackPlugin.options.metadata.HMR !== true) { %>
     <!-- Webpack Dev Server reload -->
     <script src="/webpack-dev-server.js"></script>
     <% } %>

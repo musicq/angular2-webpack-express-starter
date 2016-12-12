@@ -14,4 +14,4 @@ import { routing } from './404.routing';
         Page404
     ]
 })
-export class Module404 {}
+export default class Module404 {}

@@ -4,10 +4,8 @@
  */
 
 const app = require('express')();
-// 引入路由
-const exampleApi = require('../api/example');
 
 // 示例路由
-app.use('/example', exampleApi);
+app.use('/example', require('../api/example'));
 
 module.exports = app;

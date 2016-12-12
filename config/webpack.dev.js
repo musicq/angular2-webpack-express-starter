@@ -11,14 +11,14 @@ const commonConfig = require('./webpack.common');
  */
 const DefinePlugin = require('webpack/lib/DefinePlugin');
 const NamedModulesPlugin = require('webpack/lib/NamedModulesPlugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const LoaderOptionsPlugin = require('webpack/lib/LoaderOptionsPlugin');
 
 /**
  * Webpack Constants
  */
 const ENV = process.env.ENV = process.env.NODE_ENV = 'development';
 const HOST = process.env.HOST || 'localhost';
-const PORT = process.env.PORT || '3000';
+const PORT = process.env.PORT || 3000;
 const HMR = helpers.hasProcessFlag('hot');
 const METADATA = webpackMerge(commonConfig({env: ENV}).metadata, {
 	host: HOST,
@@ -27,22 +27,16 @@ const METADATA = webpackMerge(commonConfig({env: ENV}).metadata, {
 	HMR: HMR
 });
 
-module.exports = function(env) {
+module.exports = function() {
+	console.log(`
+----------------------------------------------------------
+|                 即将进行开发环境配置                   |
+|       **请注意开发环境的配置将不输出文件到本地**       |
+----------------------------------------------------------`);
+
 	return webpackMerge(commonConfig({env: ENV}), {
-		/**
-		 * 一些元数据，用来在 index.html 中访问并配置
-		 */
-		metadata: METADATA,
 
-		/**
-		 * 启动加载器的 debug 模式
-		 */
-		debug: true,
-
-		/**
-		 * debug 工具模式
-		 */
-		devtool: 'cheap-module-eval-source-map',
+		devtool: 'cheap-module-source-map',
 
 		/**
 		 * 文件输出配置
@@ -51,7 +45,7 @@ module.exports = function(env) {
 			// 输出路径
 			path: helpers.root('dist'),
 			// 输出每一个文件的名称
-			filename: '[name].js',
+			filename: '[name].bundle.js',
 			// map 文件名称
 			sourceMapFilename: '[name].map',
 			// The filename of non-entry chunks as relative path
@@ -62,10 +56,6 @@ module.exports = function(env) {
 		},
 
 		plugins: [
-			/**
-			 * 分离 css 文件
-			 */
-			new ExtractTextPlugin('[name].css'),
 			/**
 			 * definePlugin 接收字符串插入到代码当中, 所以你需要的话可以写上 JS 的字符串
 			 */
@@ -79,39 +69,22 @@ module.exports = function(env) {
 				}
 			}),
 
-			new NamedModulesPlugin()
+			new LoaderOptionsPlugin({
+				debug: true,
+				options: {}
+			}),
 		],
 
-		/**
-		 * Static analysis linter for TypeScript advanced options configuration
-		 * Description: An extensible linter for the TypeScript language.
-		 *
-		 * See: https://github.com/wbuchwalter/tslint-loader
-		 */
-		tslint: {
-			emitErrors: false,
-			failOnHint: false,
-			resourcePath: 'src'
-		},
-
-		/**
-		 * Webpack Development Server configuration
-		 * Description: The webpack-dev-server is a little node.js Express server.
-		 * The server emits information about the compilation state to the client,
-		 * which reacts to those events.
-		 *
-		 * See: https://webpack.github.io/docs/webpack-dev-server.html
-		 */
 		devServer: {
 			port: METADATA.port,
 			host: METADATA.host,
+			compress: true,
 			historyApiFallback: true,
-			stats: 'minimal',
 			watchOptions: {
 				aggregateTimeout: 300,
 				poll: 1000
 			},
-			outputPath: helpers.root('dist'),
+			contentBase: helpers.root('dist'),
 			// 将 node 服务转接到 4000 端口
 			// 这样就可以同时获得 webpack-dev-server 的实时刷新
 			// 也能同时调试接口
@@ -122,20 +95,13 @@ module.exports = function(env) {
 			}
 		},
 
-		/*
-		 * Include polyfills or mocks for various node stuff
-		 * Description: Node configuration
-		 *
-		 * See: https://webpack.github.io/docs/configuration.html#node
-		 */
 		node: {
-			global: 'window',
+			global: true,
 			crypto: 'empty',
 			process: true,
 			module: false,
 			clearImmediate: false,
 			setImmediate: false
 		}
-
 	});
 }

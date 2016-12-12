@@ -8,108 +8,112 @@ const helpers = require('./helpers');
 /**
  * Webpack Plugins
  */
+const AssetsPlugin = require('assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const AssetsPlugin = require('assets-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const ScriptExtHtmlWebpackPlugin = require('script-ext-html-webpack-plugin');
+const CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
+const ContextReplacementPlugin = require('webpack/lib/ContextReplacementPlugin');
 const ForkCheckerPlugin = require('awesome-typescript-loader').ForkCheckerPlugin;
-
-/**
- * postcss plugins
- */
-const precss = require('precss');
-const autoprefixer = require('autoprefixer');
+const NormalModuleReplacementPlugin = require('webpack/lib/NormalModuleReplacementPlugin');
 
 /**
  * Webpack Constants
  */
 const HMR = helpers.hasProcessFlag('hot');
 const METADATA = {
-	title: '北方网客户端移动内容管理系统',
+	title: 'Angular2 Webpack Express Starter ',
 	baseUrl: '/',
 	isDevServer: helpers.isWebpackDevServer()
 };
 
 module.exports = function(options) {
+	let isProd = options.env === 'production';
+
 	return {
 		/**
-		 * static metadata for index.html
-		 */
-		metadata: METADATA,
-
-		/**
-		 * 入口文件
+		 * 文件入口
 		 */
 		entry: {
-			polyfills: './src/polyfills',
-			vendor: './src/vendor',
-			main: './src/main',
+			polyfills: './src/polyfills.ts',
+			vendor: './src/vendor.ts',
+			main: './src/main.ts'
 		},
 
 		/**
 		 * 解析文件名
 		 */
 		resolve: {
-			extensions: ['', '.ts', '.js'],
+			extensions: ['.ts', '.js', '.json'],
 
-			// Make sure root is src
-			root: helpers.root('src'),
+			modules: [helpers.root('src'), helpers.root('node_modules')]
 		},
 
 		/**
-		 * 加载器
+		 * 对不同模块文件处理
 		 */
 		module: {
-			loaders: [
+			rules: [
+				/**
+				 * 处理 ts 文件
+				 * - angular2-template-loader 可以使得 ng2 组件内的 templateUrl|styleUrls 像这样使用：
+				 *		templateUrl: './app.component.html'
+				 *		styleUrls: ['./app.component.css']
+				 */
 				{
 					test: /\.ts$/,
-					loaders: [
+					use: [
 						'awesome-typescript-loader',
 						'angular2-template-loader',
-						// 使 angular2 支持 webpack 1.x 懒加载
 						'angular2-router-loader'
 					],
 					exclude: [/\.(spec|e2e)\.ts$/]
 				},
+
+				{
+				  test: /\.json$/,
+				  use: 'json-loader'
+				},
+
+				/**
+				 * 处理全局 css
+				 */
 				{
 					test: /\.css$/,
-					exclude: helpers.root('src', 'app'),
-					loader: ExtractTextPlugin.extract('style', 'css?sourceMap', 'postcss')
+					loader: ExtractTextPlugin.extract({
+						fallbackLoader: 'style-loader',
+						loader: ['css-loader?modules&importLoaders=1', 'postcss-loader?sourceMap=inline']
+					}),
+					exclude: [helpers.root('src', 'app')],
 				},
+
+				/**
+				 * 处理组件内 css
+				 */
 				{
 					test: /\.css$/,
 					include: helpers.root('src', 'app'),
-					loaders: ['to-string-loader', 'css-loader', 'postcss']
+					use: ['to-string-loader', 'css-loader?modules&importLoaders=1', 'postcss-loader?sourceMap=inline']
 				},
+
+				/**
+				 * 处理图片
+				 */
+				{
+					test: /\.(jpg|png|gif)$/,
+					use: 'file-loader'
+				},
+
+				/**
+				 * 处理 html
+				 */
 				{
 					test: /\.html$/,
-					loader: 'raw-loader',
-					exclude: [helpers.root('src/index.html')]
-				},
-				{
-					test: /\.(png|jpe?g|gif|svg|woff|woff2|ttf|eot|ico)$/,
-					loader: 'file?name=assets/[name].[hash].[ext]'
-				}
-			],
-
-			postLoaders: [
-				{
-					test: /\.js$/,
-					loader: 'string-replace-loader',
-					query: {
-						search: 'var sourceMappingUrl = extractSourceMappingUrl\\(cssText\\);',
-						replace: 'var sourceMappingUrl = "";',
-						flags: 'g'
-					}
+					use: 'raw-loader',
+					exclude: [helpers.root('src', 'index.html')]
 				}
 			]
-		},
-
-		/**
-		 * postcss 处理
-		 */
-		postcss: function () {
-			return [precss, autoprefixer];
 		},
 
 		plugins: [
@@ -117,9 +121,17 @@ module.exports = function(options) {
 			 * 资源文件
 			 */
 			new AssetsPlugin({
-				path: helpers.root(),
+				path: helpers.root('dist'),
 				filename: 'webpack-assets.json',
 				prettyPrint: true
+			}),
+
+			/**
+			 * 分离 css 文件
+			 */
+			new ExtractTextPlugin({
+				filename: '[name].bundle.css',
+				allChunks: true
 			}),
 
 			/**
@@ -131,9 +143,18 @@ module.exports = function(options) {
 			/**
 			 * 提取公共部分文件
 			 */
-			new webpack.optimize.CommonsChunkPlugin({
-				name: [ 'main', 'vendor', 'polyfills' ]
+			new CommonsChunkPlugin({
+				name: ['polyfills', 'vendor'].reverse()
 			}),
+
+			new ContextReplacementPlugin(
+				// The (\\|\/) piece accounts for path separators in *nix and Windows
+				/angular(\\|\/)core(\\|\/)src(\\|\/)linker/,
+				helpers.root('src'), // location of your src
+				{
+					// your Angular Async Route paths relative to this root directory
+				}
+			),
 
 			/**
 			 * 将一些不需要处理的资源拷贝出来
@@ -144,22 +165,49 @@ module.exports = function(options) {
 			}]),
 
 			/**
-			 * 处理 html
+			 * 为 html 提供一些元数据
 			 */
 			new HtmlWebpackPlugin({
 				template: 'src/index.html',
-				chunksSortMode: 'dependency'
-			})
+				title: METADATA.title,
+				chunksSortMode: 'dependency',
+				metadata: METADATA,
+				inject: 'head'
+			}),
+
+			/**
+			 * angular 有时会在 domready 事件之前运行
+			 * 会报 The Selector '' did not match any elements 的错误
+			 */
+			new ScriptExtHtmlWebpackPlugin({
+				defaultAttribute: 'defer'
+			}),
+
+			// Fix Angular 2
+			new NormalModuleReplacementPlugin(
+				/facade(\\|\/)async/,
+				helpers.root('node_modules/@angular/core/src/facade/async.js')
+			),
+			new NormalModuleReplacementPlugin(
+				/facade(\\|\/)collection/,
+				helpers.root('node_modules/@angular/core/src/facade/collection.js')
+			),
+			new NormalModuleReplacementPlugin(
+				/facade(\\|\/)errors/,
+				helpers.root('node_modules/@angular/core/src/facade/errors.js')
+			),
+			new NormalModuleReplacementPlugin(
+				/facade(\\|\/)lang/,
+				helpers.root('node_modules/@angular/core/src/facade/lang.js')
+			),
+			new NormalModuleReplacementPlugin(
+				/facade(\\|\/)math/,
+				helpers.root('node_modules/@angular/core/src/facade/math.js')
+			)
 		],
 
-		/*
-		 * Include polyfills or mocks for various node stuff
-		 * Description: Node configuration
-		 *
-		 * See: https://webpack.github.io/docs/configuration.html#node
-		 */
 		node: {
-			global: 'window',
+			global: true,
 			crypto: 'empty',
 			process: true,
 			module: false,
@@ -167,6 +215,5 @@ module.exports = function(options) {
 			setImmediate: false
 		}
 
-	}
-
+	};
 }
